@@ -78,7 +78,7 @@ The corresponding Voice API server code listens on local port 8000.
 You may set up [multiple ngrok tunnels](https://ngrok.com/docs/ngrok-agent/config/#tunnel-definition) to foward to local port 6000 (this connector code) and to local port 8000 (the Voice API application code).
 
 Start ngrok with both tunnels,</br>
-please take note of the ngrok **Enpoint URL** that forwards to port 6000 as it is needed when setting up the corresponding [sample server application](https://github.com/nexmo-se/asr-dialogflow-cx-sample-voice-application) using Vonage Voice API,
+please take note of the ngrok **Enpoint URL** that forwards to port 6000 as it is needed when setting up the corresponding [Voice API application](https://github.com/nexmo-se/asr-dialogflow-cx-sample-voice-application) using Vonage Voice API,
 that URL looks like:</br>
 `https://xxxxxxxx.ngrok.io`
 
