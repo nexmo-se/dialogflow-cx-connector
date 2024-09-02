@@ -1,4 +1,4 @@
-# Dialogflow CX connector code
+# Google Dialogflow CX Connector
 
 You can use the Dialogflow CX (DF CX) connector code to connect a Vonage Voice API call to a DF CX agent and then have an audio conversation with the agent. Caller's queries and agent's responses transcripts are posted back to the Vonage Voice API application.
 
