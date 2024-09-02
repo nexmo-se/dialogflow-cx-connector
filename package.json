@@ -1,0 +1,24 @@
+{
+  "name": "df-cx-connector",
+  "version": "1.0.0",
+  "description": "Vonage Voice API connector to Google Dialogflow CX",
+  "main": "df-cx-connector.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tony Chan",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@google-cloud/dialogflow-cx": "^4.8.0",
+    "@google-cloud/language": "^6.5.0",
+    "body-parser": "^1.20.2",
+    "dialogflow": "^1.2.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-ws": "^5.0.2",
+    "request": "^2.88.2"
+  },
+  "engines": {
+    "node": "18.19"
+  }
+}
