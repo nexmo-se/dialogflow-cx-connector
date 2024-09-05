@@ -6,12 +6,23 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const app = express();
 const expressWs = require('express-ws')(app);
-const request = require('request');
+
+//---- HTTP client ---
+
+const webHookRequest = require('request');
 
 const reqHeaders = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
 };
+
+function reqCallback(error, response, body) {
+    if (body != "Ok") {  
+      console.log("Webhook call status to VAPI application:", body);
+    };  
+}
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 //-------
 
@@ -48,20 +59,21 @@ app.use(bodyParser.json());
 
 app.ws('/socket', async (ws, req) => {
 
+  const originalUuid = req.query.original_uuid; 
+  const webhookUrl = req.query.webhook_url;
+
+  console.log('>>> websocket connected with original call uuid:', originalUuid);
+  console.log('>>> webhookUrl:', webhookUrl);
+
+  //--
+
   const date = new Date().toLocaleString();
   console.log("DialogFlow WebSocket call at " + date);
   
-  const uuid = req.query.original_uuid;
-  const vapiAppUrl = 'https://' + req.query.vapi_app_host + '/analytics';
+  // const vapiAppUrl = 'https://' + req.query.vapi_app_host + '/analytics';
   const analyzeSentiment = req.query.analyze_sentiment;
-
-  function reqCallback(error, response, body) {
-      if (body != "Ok") {  
-        console.log("Webhook call status to VAPI application:", body);
-      };  
-  }
   
-  let conversation = new Conversation(uuid);
+  let conversation = new Conversation(originalUuid);
 
   await conversation.init();
 
@@ -69,7 +81,7 @@ app.ws('/socket', async (ws, req) => {
     
     try {
       
-      const timerIds = app.get(`playtimers_${uuid}`) || [];
+      const timerIds = app.get(`playtimers_${originalUuid}`) || [];
       for (const timerId of timerIds) {
         clearTimeout(timerId);
       };
@@ -78,7 +90,7 @@ app.ws('/socket', async (ws, req) => {
 
       if ( response.detectIntentResponse.outputAudio.byteLength > 0 ) {
 
-        console.log(">>> Playback in progress for websocket:", uuid);
+        console.log(">>> Playback in progress for websocket:", originalUuid);
         
         // Send Dialogflow audio response to caller via websocket
         console.log("Sending back audio bytes:", response.detectIntentResponse.outputAudio.byteLength);
@@ -107,7 +119,7 @@ app.ws('/socket', async (ws, req) => {
           pos = newpos;
         }
 
-        app.set(`playtimers_${uuid}`, timerIds);
+        app.set(`playtimers_${originalUuid}`, timerIds);
 
       }
     } catch (e) {
@@ -116,15 +128,26 @@ app.ws('/socket', async (ws, req) => {
   
     if (response.responseId != '') {
 
-      // console.log(">>> responseMessages:", response.detectIntentResponse.queryResult.responseMessages);
+      const queryResult = response.detectIntentResponse.queryResult;
 
-      console.log(">>> transcript:", response.detectIntentResponse.queryResult.transcript);
+      console.log(">>> queryResult:", queryResult);
 
-      console.log(">>> response text:", response.detectIntentResponse.queryResult.responseMessages[0].text.text[0]);
+      let matchedIntent = "";
+      if (queryResult.intent) { matchedIntent = queryResult.intent.displayName };
+      console.log(">>> matched intent:", matchedIntent);
+
+      let currentPage = "";
+      if (queryResult.currentPage) { currentPage = queryResult.currentPage.displayName };
+      console.log(">>> current page:", currentPage);
 
       // const queryText = response.detectIntentResponse.queryResult.queryText;
+      const queryText = response.detectIntentResponse.queryResult.transcript;
+      console.log(">>> query text:", queryText);
 
-      // uncomment for sentiment analysis
+      const agentResponse = response.detectIntentResponse.queryResult.responseMessages[0].text.text[0];
+      console.log(">>> response text:", agentResponse);
+
+      //-- uncomment for sentiment analysis --
 
       // let sentimentScore = "Request text is empty or sentiment analysis is not requested";
       // if (queryText != "" && analyzeSentiment == "true") {
@@ -146,25 +169,36 @@ app.ws('/socket', async (ws, req) => {
       // });
 
       // const result = {
-      //   'uuid': uuid,
+      //   'uuid': originalUuid,
       //   'queryText': queryText,
       //   'fulfillmentText': response.detectIntentResponse.queryResult.fulfillmentText,
-      //   'sentiment': sentimentScore,
+      //   // 'sentiment': sentimentScore,
       //   'allRequiredParamsPresent': response.queryResult.allRequiredParamsPresent,
       //   'action': response.queryResult.action,
       //   'intent': response.queryResult.intent.displayName,
-      // };     
-
-      // console.log("result:", JSON.stringify(result));
-
-      // let Reqoptions = {
-      //   url: vapiAppUrl,
-      //   method: 'POST',
-      //   headers: reqHeaders,
-      //   body: JSON.stringify(result)
       // };
 
-      // request(Reqoptions, reqCallback);
+      const result = {
+      'uuid': originalUuid,
+      'userQuery': queryText,
+      'agentResponse': agentResponse,
+      'matchedIntent': matchedIntent,
+      // 'sentiment': sentimentScore,
+      'currentPage': currentPage
+      }; 
+
+      console.log("result:", JSON.stringify(result));
+
+      console.log("webhook URL:", webhookUrl);
+
+      let Reqoptions = {
+        url: webhookUrl,
+        method: 'POST',
+        headers: reqHeaders,
+        body: JSON.stringify(result)
+      };
+
+      webHookRequest(Reqoptions, reqCallback);
     }
 
   };
