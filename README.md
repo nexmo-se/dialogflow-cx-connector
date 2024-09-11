@@ -111,7 +111,7 @@ npm install
 
 Launch the applicatiom:
 ```bash
-node df-cx-connecting-server
+node df-cx-connector-server
 ```
 
 ### Command Line Heroku deployment
