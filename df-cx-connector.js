@@ -27,7 +27,7 @@ function reqCallback(error, response, body) {
 // Only if needed - For self-signed certificate in chain - In test environment
 // Do not uncomment next line in production environment
 
-// process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 //-------
 
@@ -38,9 +38,10 @@ const Conversation = require('./conversations');
 const language = require('@google-cloud/language');  // for sentiment analysis
 const client = new language.LanguageServiceClient();
 
-// ------- this server port
+//------- this server port ------
+//VCR_PORT: port when deployed on Vonage Cloud Run Time 
+const port = process.env.VCR_PORT || process.env.PORT || 6000;
 
-const port = process.env.PORT || 6000;
 
 //==========================================================
 
@@ -282,7 +283,9 @@ async function analyzeSentimentOfText(text) {
 
 //----------
 
-app.use('/', express.static(__dirname));
+app.get('/_/health', async (req, res) => {
+    res.sendStatus(200);
+});
 
 //-----------
 
