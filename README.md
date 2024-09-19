@@ -8,6 +8,10 @@ Dialogflow CX connector makes use of the [WebSockets feature](https://developer.
 
 See https://github.com/nexmo-se/dialogflow-cx-voice-application for a **sample Voice API application** using this Dialogflow CX connector code to connect voice calls to a DF CX agent.
 
+## Voice responses
+
+This connector code will send back Dialogflow agent's Text-to-Speech (TTS) voice responses over the same WebSocket in the other direction.
+
 ## Transcripts
 
 This connector code will send caller's speech transcript, and Dialogflow agent's response transcript to the Voice API application via webhook calls.

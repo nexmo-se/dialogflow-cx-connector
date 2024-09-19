@@ -22,7 +22,12 @@ function reqCallback(error, response, body) {
     };  
 }
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+//--
+
+// Only if needed - For self-signed certificate in chain - In test environment
+// Do not uncomment next line in production environment
+
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 //-------
 
@@ -144,7 +149,17 @@ app.ws('/socket', async (ws, req) => {
       const queryText = response.detectIntentResponse.queryResult.transcript;
       console.log(">>> query text:", queryText);
 
-      const agentResponse = response.detectIntentResponse.queryResult.responseMessages[0].text.text[0];
+      const fullResponse = response.detectIntentResponse.queryResult;
+      console.log('\n>>> fullResponse:\n', fullResponse);
+
+      
+      // const agentResponse = response.detectIntentResponse.queryResult.responseMessages[0].text.text[0];
+
+      let agentResponse = "";
+
+      if (fullResponse.responseMessages[0]) {
+        agentResponse = fullResponse.responseMessages[0].text.text[0];
+      }
       console.log(">>> response text:", agentResponse);
 
       //-- uncomment for sentiment analysis --
