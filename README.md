@@ -10,7 +10,7 @@ See https://github.com/nexmo-se/dialogflow-cx-voice-application for a **sample V
 
 ## Voice responses
 
-This connector code will send back Dialogflow agent's Text-to-Speech (TTS) voice responses over the same WebSocket in the other direction.
+This connector code will send back the DF CX agent's Text-to-Speech (TTS) voice responses over the same WebSocket in the other direction.
 
 ## Transcripts
 
